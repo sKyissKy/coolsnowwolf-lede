@@ -20,7 +20,10 @@ PKG_LICENSE:=GPL-2.0
 PKG_BUILD_FLAGS:=no-lto
 PKG_FLAGS := nonshared
 
-PKG_CONFIG_DEPENDS:=CONFIG_PACKAGE_kmod-mt7615d_dbdc
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_PACKAGE_kmod-mt7615d_dbdc \
+	CONFIG_PACKAGE_kmod-mt_wifi \
+	CONFIG_PACKAGE_kmod-mt_wifi7
 
 IWINFO_ABI_VERSION:=20230701
 
@@ -36,7 +39,7 @@ define Package/libiwinfo
 endef
 
 define Package/libiwinfo/description
-  Wireless information library with simplified API for nl80211
+  Wireless information library with simplified API for nl80211, mtk
   and wext driver interfaces.
 endef
 
@@ -78,6 +81,8 @@ endef
 
 IWINFO_BACKENDS := \
 	nl80211 \
+	$(if $(CONFIG_PACKAGE_kmod-mt_wifi),mtk) \
+	$(if $(CONFIG_PACKAGE_kmod-mt_wifi7),mtk) \
 	$(if $(CONFIG_PACKAGE_kmod-mt7615d_dbdc),ra)
 
 TARGET_CFLAGS += \
@@ -90,7 +95,7 @@ MAKE_FLAGS += \
 	FPIC="$(FPIC)" \
 	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_LDFLAGS)" \
-	BACKENDS="$(strip $(IWINFO_BACKENDS))" \
+	BACKENDS="$(strip $(sort $(IWINFO_BACKENDS)))" \
 	SOVERSION="$(IWINFO_ABI_VERSION)"
 
 define Build/InstallDev

@@ -39,6 +39,7 @@ opkg = \
   $(STAGING_DIR_HOST)/bin/opkg \
 	--offline-root $(1) \
 	--force-postinstall \
+	$(if $(CONFIG_PACKAGE_wifi-scripts)$(CONFIG_DEFAULT_wifi-scripts),--force-overwrite) \
 	--add-dest root:/ \
 	--add-arch all:100 \
 	--add-arch $(if $(ARCH_PACKAGES),$(ARCH_PACKAGES),$(BOARD)):200
