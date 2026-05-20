@@ -118,12 +118,18 @@ platform_do_upgrade() {
 	tplink,tl-xdr6088|\
 	tplink,tl-xtr8488|\
 	tplink,tl-7dr7230-rev1.0-sp2|\
-	tplink,tl-7dr7299-v1|\
 	xiaomi,mi-router-ax3000t-ubootmod|\
 	xiaomi,redmi-router-ax6000-ubootmod|\
 	xiaomi,mi-router-wr30u-ubootmod|\
 	zyxel,ex5601-t0-ubootmod)
 		fit_do_upgrade "$1"
+		;;
+	tplink,tl-7dr7299-v1)
+		[ -e /dev/fit0 ] && fitblk /dev/fit0
+		[ -e /dev/fitrw ] && fitblk /dev/fitrw
+		CI_KERNPART="fit"
+		CI_ROOTPART="rootfs"
+		nand_do_upgrade "$1"
 		;;
 	acer,predator-w6|\
 	acer,predator-w6d|\
@@ -232,14 +238,17 @@ platform_check_image() {
 	hiveton,h5000m|\
 	imou,lc-hx3001|\
 	netcore,n60-pro|\
-	tplink,tl-7dr7230-rev1.0-sp2|\
-	tplink,tl-7dr7299-v1)
+	tplink,tl-7dr7230-rev1.0-sp2)
 		magic="$(dd if="$1" bs=1 skip=257 count=5 2>/dev/null)"
 		[ "$magic" != "ustar" ] && {
 			echo "Invalid image type."
 			return 1
 		}
 		return 0
+		;;
+	tplink,tl-7dr7299-v1)
+		nand_do_platform_check "$board" "$1"
+		return $?
 		;;
 	*)
 		nand_do_platform_check "$board" "$1"

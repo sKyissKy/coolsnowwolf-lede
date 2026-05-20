@@ -24,12 +24,19 @@ define Device/tplink_tl-7dr7299-v1
   PAGESIZE := 2048
   KERNEL_IN_UBI := 1
   UBOOTENV_IN_UBI := 1
-  IMAGES := sysupgrade.itb
+  IMAGES := factory.bin sysupgrade.bin sysupgrade.itb
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
   KERNEL := kernel-bin | gzip
   KERNEL_INITRAMFS := kernel-bin | lzma | \
 	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
+  IMAGE/factory.bin := append-kernel | \
+	fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb | \
+	pad-to 64k | append-rootfs | pad-rootfs
+  IMAGE/sysupgrade.bin := append-kernel | \
+	fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb | \
+	sysupgrade-tar kernel=$$$$@ | append-metadata
   IMAGE/sysupgrade.itb := append-kernel | \
-	fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-with-rootfs | pad-rootfs | append-metadata
+	fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-with-rootfs | \
+	pad-rootfs | append-metadata
 endef
 TARGET_DEVICES += tplink_tl-7dr7299-v1

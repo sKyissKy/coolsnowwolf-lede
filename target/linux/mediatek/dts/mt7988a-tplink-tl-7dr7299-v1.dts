@@ -26,7 +26,7 @@
 	};
 
 	chosen {
-		rootdisk = <&ubi_rootdisk>;
+		rootdisk = <&ubi_rootfs>;
 		stdout-path = "serial0:115200n8";
 	};
 
@@ -476,6 +476,10 @@
 				volumes {
 					ubi_rootdisk: ubi-volume-fit {
 						volname = "fit";
+					};
+
+					ubi_rootfs: ubi-volume-rootfs {
+						volname = "rootfs";
 					};
 				};
 			};
