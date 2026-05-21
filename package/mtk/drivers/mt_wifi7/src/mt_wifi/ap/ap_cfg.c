@@ -11416,6 +11416,7 @@ INT RTMPAPQueryInformation(
 				"Invalid wdev for cmd %d\n", cmd);
 		break;
 	}
+#ifdef DOT11K_RRM_SUPPORT
 	case OID_802_11_RRM:
 		if (wdev) {
 			wrq->u.data.length = sizeof(wdev->RrmCfg.bDot11kRRMEnable);
@@ -11426,6 +11427,7 @@ INT RTMPAPQueryInformation(
 			MTWF_DBG(pAd, DBG_CAT_PROTO, CATPROTO_RRM, DBG_LVL_ERROR,
 				"Invalid wdev for cmd %d\n", cmd);
 		break;
+#endif /* DOT11K_RRM_SUPPORT */
 	case OID_802_11_RADIO_STATS:
 	{
 		struct wifi_radio_stats Stats;

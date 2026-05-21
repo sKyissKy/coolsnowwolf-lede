@@ -4137,9 +4137,13 @@ INT set_wapp_param(
 	UINT32 Param,
 	UINT32 Value)
 {
+#if defined(CONFIG_DOT11V_WNM) || defined(CONFIG_PROXY_ARP) || defined(CONFIG_DOT11U_INTERWORKING) || defined(CONFIG_HOTSPOT_R2)
 	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
 	UCHAR APIndex = pObj->ioctl_if;
+#endif /* CONFIG_DOT11V_WNM || CONFIG_PROXY_ARP || CONFIG_DOT11U_INTERWORKING || CONFIG_HOTSPOT_R2 */
+#if defined(CONFIG_DOT11V_WNM) || defined(CONFIG_PROXY_ARP)
 	PWNM_CTRL pWNMCtrl;
+#endif /* CONFIG_DOT11V_WNM || CONFIG_PROXY_ARP */
 #ifdef CONFIG_DOT11U_INTERWORKING
 	PGAS_CTRL pGASCtrl;
 #endif /* CONFIG_DOT11U_INTERWORKING */
@@ -4150,15 +4154,19 @@ INT set_wapp_param(
 	wdev = &pAd->ApCfg.MBSSID[APIndex].wdev;
 #endif /* CONFIG_HOTSPOT_R2 */
 
+#if defined(CONFIG_DOT11V_WNM) || defined(CONFIG_PROXY_ARP)
 	pWNMCtrl = &pAd->ApCfg.MBSSID[APIndex].WNMCtrl;
+#endif /* CONFIG_DOT11V_WNM || CONFIG_PROXY_ARP */
 #ifdef CONFIG_DOT11U_INTERWORKING
 	pGASCtrl = &pAd->ApCfg.MBSSID[APIndex].GASCtrl;
 #endif /* CONFIG_DOT11U_INTERWORKING */
 
 	switch (Param) {
+#ifdef CONFIG_DOT11V_WNM
 	case PARAM_WNM_BSS_TRANSITION_MANAGEMENT:
 		pWNMCtrl->WNMBTMEnable = Value;
 		break;
+#endif /* CONFIG_DOT11V_WNM */
 
 #ifdef CONFIG_DOT11U_INTERWORKING
 	case PARAM_EXTERNAL_ANQP_SERVER_TEST:
@@ -4174,9 +4182,11 @@ INT set_wapp_param(
 		break;
 #endif /* CONFIG_DOT11U_INTERWORKING */
 
+#ifdef CONFIG_DOT11V_WNM
 	case PARAM_WNM_NOTIFICATION:
 		pWNMCtrl->WNMNotifyEnable = Value;
 		break;
+#endif /* CONFIG_DOT11V_WNM */
 #ifdef CONFIG_HOTSPOT_R2
 
 	case PARAM_QOSMAP:
@@ -4188,10 +4198,12 @@ INT set_wapp_param(
 		hotspot_update_bssflag(pAd, fgDGAFDisable, Value, pHSCtrl);
 		break;
 
+#ifdef CONFIG_PROXY_ARP
 	case PARAM_PROXY_ARP:
 		pWNMCtrl->ProxyARPEnable = Value;
 		hotspot_update_bssflag(pAd, fgProxyArpEnable, Value, pHSCtrl);
 		break;
+#endif /* CONFIG_PROXY_ARP */
 
 	case PARAM_L2_FILTER:
 		pHSCtrl->L2Filter = Value;
@@ -4221,7 +4233,9 @@ static INT set_wapp_cmm_ie(
 	IN UINT32 IELen,
 	IN UCHAR apidx)
 {
+#if defined(CONFIG_DOT11V_WNM) || defined(CONFIG_PROXY_ARP)
 	PWNM_CTRL pWNMCtrl =  &pAd->ApCfg.MBSSID[apidx].WNMCtrl;
+#endif /* CONFIG_DOT11V_WNM || CONFIG_PROXY_ARP */
 #ifdef CONFIG_DOT11U_INTERWORKING
 	PGAS_CTRL pGasCtrl = &pAd->ApCfg.MBSSID[apidx].GASCtrl;
 #endif /* CONFIG_DOT11U_INTERWORKING */
@@ -4287,6 +4301,7 @@ static INT set_wapp_cmm_ie(
 		break;
 #endif /* CONFIG_DOT11U_INTERWORKING */
 
+#ifdef CONFIG_DOT11V_WNM
 	case IE_TIME_ADVERTISEMENT:
 		OS_SEM_LOCK(&pWNMCtrl->IeLock);
 		if (pWNMCtrl->TimeadvertisementIE)
@@ -4297,7 +4312,9 @@ static INT set_wapp_cmm_ie(
 		MTWF_DBG(NULL, DBG_CAT_AP, CATAP_WAPP, DBG_LVL_INFO,
 			"Set Time Advertisement IE\n");
 		break;
+#endif /* CONFIG_DOT11V_WNM */
 
+#ifdef CONFIG_DOT11V_WNM
 	case IE_TIME_ZONE:
 		OS_SEM_LOCK(&pWNMCtrl->IeLock);
 		if (pWNMCtrl->TimezoneIE)
@@ -4307,6 +4324,7 @@ static INT set_wapp_cmm_ie(
 		OS_SEM_UNLOCK(&pWNMCtrl->IeLock);
 		MTWF_DBG(NULL, DBG_CAT_AP, CATAP_WAPP, DBG_LVL_INFO, "Set Time Zone IE\n");
 		break;
+#endif /* CONFIG_DOT11V_WNM */
 
 #ifdef CONFIG_HOTSPOT_R2
 	case IE_QOS_MAP_SET: {
@@ -4577,7 +4595,7 @@ int wapp_send_event_offchannel_info(IN PRTMP_ADAPTER pAd, IN void *data, IN int 
 			"Err: event send fail!\n");
 		return ret;
 	}
-#else
+#elif defined(OFFCHANNEL_SCAN_FEATURE)
 	RtmpOSWrielessEventSend(pAd->net_dev, RT_WLAN_EVENT_CUSTOM, OID_OFFCHANNEL_INFO, NULL,
 				data, len);
 #endif /* RT_CFG80211_SUPPORT */

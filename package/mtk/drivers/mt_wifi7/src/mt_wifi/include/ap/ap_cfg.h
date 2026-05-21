@@ -469,7 +469,9 @@ extern struct PRIVATE_SHOW_PROC RTMP_PRIVATE_AP_SHOW_SUPPORT_PROC[];
 #ifdef RT_CFG80211_SUPPORT
 #ifdef MBO_SUPPORT
 INT mtk_cfg80211_Set_mbo_npc_Proc(PRTMP_ADAPTER pAd, UCHAR *npc_value);
+#ifdef WNM_SUPPORT
 VOID Send_WNM_Notify_Req_toAP(IN PRTMP_ADAPTER pAd, IN struct wifi_dev *wdev);
+#endif /* WNM_SUPPORT */
 #endif
 #endif
 

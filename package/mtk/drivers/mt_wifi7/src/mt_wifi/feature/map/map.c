@@ -26,10 +26,10 @@ UCHAR MAP_TRAFFIC_SEPARATION_LEN = 2;
 #define MAP_PROFILE_ATTRIBUTE 0x07
 #define MAP_TRAFFIC_SEPARATION_ATTRIBUTE 0x08
 #endif
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 #define RADIO_ON_SET	1
 #define RADIO_ON_RESET	2
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 #ifdef QOS_R1
 extern void qos_set_dscp2up_mapping(PRTMP_ADAPTER pAd, BSS_STRUCT * pMbss);
 #endif
@@ -2542,7 +2542,7 @@ int mtk_nl80211_easymesh_set_radio_on(
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd) {
 			APStartUp(pAd, pMbss, AP_BSS_OPER_BY_RF);
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 			/*
 			 * Keep the R1KH table when Radio On is done twice for MBO-4.2.6(E)
 			 * case to meet the R1KH miss case.
@@ -2554,7 +2554,7 @@ int mtk_nl80211_easymesh_set_radio_on(
 
 			if (pAd->ApCfg.FtTab.RadioOn == RADIO_ON_RESET)
 				pAd->ApCfg.FtTab.RadioOn = FALSE;
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 		}
 #endif
 		wdev->radio_off_req = FALSE;
@@ -2562,9 +2562,9 @@ int mtk_nl80211_easymesh_set_radio_on(
 		wdev->radio_off_req = TRUE;
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd) {
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 			pAd->ApCfg.FtTab.FT_RadioOff = TRUE;
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 			APStop(pAd, pMbss, AP_BSS_OPER_BY_RF);
 		}
 #endif
