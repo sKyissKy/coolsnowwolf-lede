@@ -1,0 +1,52 @@
+From: OpenWrt Builder <builder@openwrt.local>
+Subject: mt_wifi7: fix MIN macro conflict with Linux 6.6.139
+
+Linux 6.6.139 provides uppercase MIN()/MAX() macros through linux/minmax.h.
+The mt_wifi7 vendor code also defines local MIN()/MAX() macros, and the
+kernel build treats those redefinition warnings as errors.
+
+Guard the local fallback so newer kernels use the kernel-provided MIN().
+Keep the fix in an OpenWrt package patch rather than modifying the vendor
+source directly.
+
+--- a/mt_wifi/feature/rrm/rrm.c
++++ b/mt_wifi/feature/rrm/rrm.c
+@@ -2504,7 +2504,9 @@ VOID RRM_PeerMeasureReqAction(
+ 		IN PRTMP_ADAPTER pAd,
+ 		IN MLME_QUEUE_ELEM *Elem)
+ {
+-#define MIN(_x, _y) ((_x) > (_y) ? (_x) : (_y))
++#ifndef MIN
++#define MIN(_x, _y) ((_x) < (_y) ? (_x) : (_y))
++#endif
+ 	MEASURE_REQ_INFO MeasureReqInfo;
+ 	RRM_BEACON_REQ_INFO BcnReq;
+ 	PFRAME_802_11 pFr = (PFRAME_802_11)Elem->Msg;
+--- a/mt_wifi/feature/rrm/rrm_tlv.c
++++ b/mt_wifi/feature/rrm/rrm_tlv.c
+@@ -979,7 +979,9 @@ VOID RRM_EnqueueNeighborRep(
+ 	IN PCHAR pSsid,
+ 	IN UINT8 SsidLen)
+ {
+-#define MIN(_x, _y) ((_x) > (_y) ? (_x) : (_y))
++#ifndef MIN
++#define MIN(_x, _y) ((_x) < (_y) ? (_x) : (_y))
++#endif
+ 	UINT loop;
+ 	HEADER_802_11 ActHdr;
+ 	PUCHAR pOutBuffer = NULL;
+--- a/mt_wifi/include/wlanif/wlan_common.h
++++ b/mt_wifi/include/wlanif/wlan_common.h
+@@ -107,8 +107,12 @@ enum
+ 	ACL_POLICY_ALLOW	= 2				/* allow traffic from MAC */
+ };
+ 
++#ifndef MIN
+ #define MIN(a, b)					((a) < (b) ? (a) : (b))
++#endif
++#ifndef MAX
+ #define MAX(a, b)					((a) > (b) ? (a) : (b))
++#endif
+ 
+ #define SETBIT(a,i)					((a)[(i) >> 3] |= 1 << ((i) & (NBBY - 1)))
+ #define CLRBIT(a,i)					((a)[(i) >> 3] &= ~(1 << ((i) & (NBBY - 1))))

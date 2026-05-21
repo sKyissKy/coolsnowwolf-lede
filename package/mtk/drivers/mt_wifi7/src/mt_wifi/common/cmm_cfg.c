@@ -31,10 +31,10 @@
 #ifdef MAP_R2
 #include "map.h"
 #endif
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 #define RADIO_ON_SET	1
 #define RADIO_ON_RESET	2
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 #define MSG_LEN 2048
 static BOOLEAN RT_isLegalCmdBeforeInfUp(RTMP_STRING *SetCmd);
 RTMP_STRING *wdev_type2str(int type);
@@ -2575,7 +2575,7 @@ INT	Set_RadioOn_Proc(
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd) {
 			APStartUp(pAd, pMbss, AP_BSS_OPER_BY_RF);
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 			/*
 			 * Keep the R1KH table when Radio On is done twice for MBO-4.2.6(E)
 			 * case to meet the R1KH miss case.
@@ -2587,7 +2587,7 @@ INT	Set_RadioOn_Proc(
 
 			if (pAd->ApCfg.FtTab.RadioOn == RADIO_ON_RESET)
 				pAd->ApCfg.FtTab.RadioOn = FALSE;
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 		}
 #endif
 		wdev->radio_off_req = FALSE;
@@ -2595,9 +2595,9 @@ INT	Set_RadioOn_Proc(
 		wdev->radio_off_req = TRUE;
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd) {
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 			pAd->ApCfg.FtTab.FT_RadioOff = TRUE;
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 			APStop(pAd, pMbss, AP_BSS_OPER_BY_RF);
 		}
 #endif
@@ -11638,8 +11638,10 @@ INT mtk_cfg80211_Set_mbo_npc_Proc(
 		NdisZeroMemory(pMboCtrl->npc, sizeof(pMboCtrl->npc));
 	}
 
+#ifdef WNM_SUPPORT
 	if (req_type != PRESET_PREF)
 		Send_WNM_Notify_Req_toAP(pAd, pWdev);
+#endif /* WNM_SUPPORT */
 
 	MTWF_DBG(pAd, DBG_CAT_PROTO, CATPROTO_MBO, DBG_LVL_INFO,
 			"req_type %d channel %d, pref %d, reason_code %d reg_class %d\n",

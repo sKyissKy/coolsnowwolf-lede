@@ -300,9 +300,9 @@ static NTSTATUS BssTerminate(IN PRTMP_ADAPTER pAd, IN PCmdQElmt CMDQelmt)
 
 	NdisMoveMemory(&apidx, CMDQelmt->buffer, sizeof(UCHAR));
 
-#ifdef FT_R1KH_KEEP
+#if defined(DOT11R_FT_SUPPORT) && defined(FT_R1KH_KEEP)
 	pAd->ApCfg.FtTab.FT_RadioOff = TRUE;
-#endif /* FT_R1KH_KEEP */
+#endif /* DOT11R_FT_SUPPORT && FT_R1KH_KEEP */
 
 	/*
 	Inorder to pass MBO Cert 4.2.5.4, APUT should send out a DISASSOC frame when Termination timer times out

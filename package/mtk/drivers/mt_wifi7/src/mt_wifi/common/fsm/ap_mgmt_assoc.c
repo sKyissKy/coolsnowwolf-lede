@@ -1814,9 +1814,8 @@ static VOID ap_cmm_peer_assoc_req_action(
 #endif /* WAPP_SUPPORT */
 		goto assoc_check;
 	}
-#endif /* DOT11R_FT_SUPPORT */
-
 	NdisZeroMemory(rsnxe_ie, MAX_LEN_OF_RSNXEIE);
+#endif /* DOT11R_FT_SUPPORT */
 
 	/* disallow new association */
 	if (pAd->ApCfg.BANClass3Data == TRUE) {

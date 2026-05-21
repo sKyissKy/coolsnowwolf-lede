@@ -1,0 +1,11 @@
+--- a/src/rtl8261d_main.c
++++ b/src/rtl8261d_main.c
+@@ -1226,7 +1226,7 @@ int rtl8261x_set_loopback(struct phy_device *phydev, bool enable)
+ }
+ 
+ 
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6,12,44)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6,6,139)
+ int rtl8261x_match_phy_device_c45(struct phy_device *phydev)
+ #else
+ int rtl8261x_match_phy_device_c45(struct phy_device *phydev,

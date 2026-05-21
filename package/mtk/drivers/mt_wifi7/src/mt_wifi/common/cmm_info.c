@@ -39,7 +39,9 @@
 #endif
 
 #define MCAST_WCID_TO_REMOVE 0 /* Pat: TODO */
+#ifndef MIN
 #define MIN(a, b)					((a) < (b) ? (a) : (b))
+#endif
 INT UNII4BandSupportRegions[] = {25, 26};
 INT MCSMappingRateTable[] = {
 	2,  4, 11, 22, 12,  18,  24,  36, 48,  72,  96, 108, 109, 110, 111, 112,/* CCK and OFDM */
@@ -13777,7 +13779,7 @@ INT show_sysinfo_proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg)
 
 			if (wdev->if_dev) {
 				UINT idx, q_num;
-				UCHAR *mac_str = RTMP_OS_NETDEV_GET_PHYADDR(wdev->if_dev);
+				const UCHAR *mac_str = RTMP_OS_NETDEV_GET_PHYADDR(wdev->if_dev);
 
 				MTWF_PRINT("\t\tOS NetDev status(%s[%d]-"MACSTR"):\n",
 						  RtmpOsGetNetDevName(wdev->if_dev),

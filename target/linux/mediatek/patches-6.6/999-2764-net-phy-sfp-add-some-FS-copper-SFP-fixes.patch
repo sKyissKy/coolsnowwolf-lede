@@ -12,9 +12,7 @@ diff --git a/drivers/net/phy/realtek/realtek_main.c b/drivers/net/phy/realtek/re
 index ffd14d0..1ea213b 100644
 --- a/drivers/net/phy/realtek/realtek_main.c
 +++ b/drivers/net/phy/realtek/realtek_main.c
-@@ -840,23 +840,10 @@ static int rtl822x_probe(struct phy_device *phydev)
- 
- static int rtl822xb_config_init(struct phy_device *phydev)
+@@ -1115,16 +1115,8 @@ static int rtl822xb_config_init(struct phy_device *phydev)
  {
 -	bool has_2500, has_sgmii;
 +	bool has_2500 = true, has_sgmii = false;
@@ -28,11 +26,6 @@ index ffd14d0..1ea213b 100644
 -	has_sgmii = test_bit(PHY_INTERFACE_MODE_SGMII,
 -			     phydev->host_interfaces) ||
 -		    phydev->interface == PHY_INTERFACE_MODE_SGMII;
--
--	/* disable listening on MDIO broadcast address (0) */
--	ret = phy_clear_bits_mmd(phydev, MDIO_MMD_VEND2, 0xa430, BIT(13));
--	if (ret < 0)
--		return ret;
 -
  	/* fill in possible interfaces */
  	__assign_bit(PHY_INTERFACE_MODE_2500BASEX, phydev->possible_interfaces,

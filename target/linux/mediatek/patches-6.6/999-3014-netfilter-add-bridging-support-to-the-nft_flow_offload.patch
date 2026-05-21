@@ -124,13 +124,19 @@ index 53fd3f7..6088a34 100644
  			if (is_zero_ether_addr(info->h_source))
  				memcpy(info->h_source, path->dev->dev_addr, ETH_ALEN);
  
-@@ -145,7 +224,8 @@ static void nft_dev_path_info(const struct net_device_path_stack *stack,
+@@ -145,10 +224,11 @@ static void nft_dev_path_info(const struct net_device_path_stack *stack,
  				info->num_encaps++;
  				break;
  			case DEV_PATH_BR_VLAN_UNTAG:
--				info->num_encaps--;
-+				if (info->num_encaps > 0)
-+					info->num_encaps--;
+-				if (WARN_ON_ONCE(info->num_encaps-- == 0)) {
+-					info->indev = NULL;
+-					break;
+-				}
++				if (WARN_ON_ONCE(info->num_encaps == 0)) {
++					info->indev = NULL;
++					break;
++				}
++				info->num_encaps--;
  				break;
  			case DEV_PATH_BR_VLAN_KEEP:
  				break;

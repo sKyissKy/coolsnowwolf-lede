@@ -583,7 +583,9 @@ static VOID MboUpdateNRElement(
 		BssidInfo.field.SpectrumMng = (pBssEntry->CapabilityInfo & (1 << 8)) ? 1:0;
 		BssidInfo.field.Qos = (pBssEntry->CapabilityInfo & (1 << 9)) ? 1:0;
 		BssidInfo.field.APSD = (pBssEntry->CapabilityInfo & (1 << 11)) ? 1:0;
+#ifdef DOT11K_RRM_SUPPORT
 		BssidInfo.field.RRM = (pBssEntry->CapabilityInfo & RRM_CAP_BIT) ? 1:0;
+#endif /* DOT11K_RRM_SUPPORT */
 		BssidInfo.field.DelayBlockAck = (pBssEntry->CapabilityInfo & (1 << 14)) ? 1:0;
 		BssidInfo.field.ImmediateBA = (pBssEntry->CapabilityInfo & (1 << 15)) ? 1:0;
 #ifdef DOT11R_FT_SUPPORT
@@ -632,10 +634,14 @@ static VOID MboUpdateNRElement(
 		BssidInfo.field.SpectrumMng = (pBssEntry->CapabilityInfo & (1 << 8)) ? 1:0;
 		BssidInfo.field.Qos = (pBssEntry->CapabilityInfo & (1 << 9)) ? 1:0;
 		BssidInfo.field.APSD = (pBssEntry->CapabilityInfo & (1 << 11)) ? 1:0;
+#ifdef DOT11K_RRM_SUPPORT
 		BssidInfo.field.RRM = (pBssEntry->CapabilityInfo & RRM_CAP_BIT) ? 1:0;
+#endif /* DOT11K_RRM_SUPPORT */
 		BssidInfo.field.DelayBlockAck = (pBssEntry->CapabilityInfo & (1 << 14)) ? 1:0;
 		BssidInfo.field.ImmediateBA = (pBssEntry->CapabilityInfo & (1 << 15)) ? 1:0;
+#if defined(DOT11R_FT_SUPPORT) || defined(DOT11K_RRM_SUPPORT)
 		BssidInfo.field.MobilityDomain = (pBssEntry->bHasMDIE) ? 1:0;
+#endif /* DOT11R_FT_SUPPORT || DOT11K_RRM_SUPPORT */
 		BssidInfo.field.HT = HAS_HT_CAPS_EXIST(pBssEntry->ie_exists) ? 1 : 0;
 #ifdef DOT11_VHT_AC
 		BssidInfo.field.VHT = HAS_VHT_CAPS_EXIST(pBssEntry->ie_exists) ? 1 : 0;
@@ -648,27 +654,32 @@ static VOID MboUpdateNRElement(
 #endif
 
 		if (HAS_EHT_CAPS_EXIST(pBssEntry->ie_exists))
-			pBssEntry->CondensedPhyType = 16;
+			CondensedPhyType = 16;
 		else if (HAS_HE_CAPS_EXIST(pBssEntry->ie_exists))
-			pBssEntry->CondensedPhyType = 14;
+			CondensedPhyType = 14;
 		else if (HAS_VHT_CAPS_EXIST(pBssEntry->ie_exists))
-			pBssEntry->CondensedPhyType = 9;
+			CondensedPhyType = 9;
 		else if HAS_HT_CAPS_EXIST(pBssEntry->ie_exists)
-			pBssEntry->CondensedPhyType = 7;
+			CondensedPhyType = 7;
 		else if (ERP_IS_NON_ERP_PRESENT(pBssEntry->Erp))
-			pBssEntry->CondensedPhyType = 6;
+			CondensedPhyType = 6;
 		else
-			pBssEntry->CondensedPhyType = 4;
+			CondensedPhyType = 4;
 
 		pNeighborEntry->BssidInfo = BssidInfo.word;
 		/* If the NR is from a client, then
 		 * pBssEntry->RegulatoryClass would be already set */
+#ifdef DOT11K_RRM_SUPPORT
 		pNeighborEntry->RegulatoryClass = (pBssEntry->RegulatoryClass ?
 				pBssEntry->RegulatoryClass :
 				get_regulatory_class(pAd, pBssEntry->Channel,
 								pWdev->PhyMode, pWdev));
+#else
+		pNeighborEntry->RegulatoryClass = get_regulatory_class(pAd, pBssEntry->Channel,
+								pWdev->PhyMode, pWdev);
+#endif /* DOT11K_RRM_SUPPORT */
 		pNeighborEntry->ChNum = pBssEntry->Channel;
-		pNeighborEntry->PhyType = pBssEntry->CondensedPhyType;
+		pNeighborEntry->PhyType = CondensedPhyType;
 		pNeighborEntry->akm = pBssEntry->AKMMap;
 		pNeighborEntry->cipher = pBssEntry->PairwiseCipher;
 		pNeighborEntry->TbttInfoSetNum = 0;
@@ -828,7 +839,9 @@ INT MboIndicateNeighborReportToDaemon(
 			NeighborRepList.CurrNum++;
 			if (pBssEntry) {
 				/* Regulatory class would be determined in MboUpdateNRElement() */
+#ifdef DOT11K_RRM_SUPPORT
 				pBssEntry->RegulatoryClass = 0;
+#endif /* DOT11K_RRM_SUPPORT */
 				MboUpdateNRElement(pAd, pWdev, pBssEntry, pNeighborEntry, pWdev->func_idx);
 
 				MTWF_DBG(NULL, DBG_CAT_PROTO, CATPROTO_MBO, DBG_LVL_INFO,
@@ -1542,6 +1555,7 @@ VOID MboCheckBssTermination(
 	}
 }
 
+#ifdef WNM_SUPPORT
 VOID Send_WNM_Notify_Req_toAP(
 		IN PRTMP_ADAPTER pAd,
 		IN struct wifi_dev *wdev)
@@ -1614,6 +1628,7 @@ VOID Send_WNM_Notify_Req_toAP(
 
 	return;
 }
+#endif /* WNM_SUPPORT */
 
 /* format : iwpriv [interface] set mbo_ch_pref=[channel]-[preference]-[reason code]
  * sample : iwpriv ra0 set mbo_ch_pref=48-0-2
@@ -1675,8 +1690,10 @@ INT SetMboChPrefProc(
 		NdisZeroMemory(pMboCtrl->npc, sizeof(pMboCtrl->npc));
 	}
 
+#ifdef WNM_SUPPORT
 	if (req_type != PRESET_PREF)
 		Send_WNM_Notify_Req_toAP(pAd, pWdev);
+#endif /* WNM_SUPPORT */
 
 	MTWF_DBG(pAd, DBG_CAT_PROTO, CATPROTO_MBO, DBG_LVL_INFO,
 			"channel %d, pref %d, reason_code %d\n",
